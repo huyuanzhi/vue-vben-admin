@@ -50,19 +50,26 @@
               enter-x
             "
           >
-            <LoginForm />
+            <LoginForm @verifyShow ="showCaptchaBox" ref="loginForm"/>
             <ForgetPasswordForm />
             <RegisterForm />
             <MobileForm />
             <QrCodeForm />
           </div>
         </div>
+        <Verify
+          ref="verify"
+          :mode="'pop'"
+          :captcha-type="'blockPuzzle'"
+          :img-size="{ width: '330px', height: '155px' }"
+          @success="captchaVerifySuccess"
+        />
       </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-  import { computed } from 'vue';
+import {computed, ref} from 'vue';
   import { AppLogo } from '/@/components/Application';
   import { AppLocalePicker, AppDarkModeToggle } from '/@/components/Application';
   import LoginForm from './LoginForm.vue';
@@ -74,19 +81,28 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useLocaleStore } from '/@/store/modules/locale';
+  import { Verify } from '/@/components/Verifition'
 
   defineProps({
     sessionTimeout: {
       type: Boolean,
     },
   });
-
+  const verify = ref(null);
   const globSetting = useGlobSetting();
   const { prefixCls } = useDesign('login');
   const { t } = useI18n();
   const localeStore = useLocaleStore();
   const showLocale = localeStore.getShowPicker;
-  const title = computed(() => globSetting?.title ?? '');
+  const loginForm = ref(null);
+
+  async function captchaVerifySuccess(verifyParams) {
+    console.log(loginForm.value)
+    loginForm.value.verifySuccess(verifyParams);
+  }
+  async function showCaptchaBox(){
+    verify.value.show()
+  }
 </script>
 <style lang="less">
   @prefix-cls: ~'@{namespace}-login';

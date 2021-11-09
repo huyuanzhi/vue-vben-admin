@@ -45,7 +45,7 @@
     </ARow>
 
     <FormItem class="enter-x">
-      <Button type="primary" size="large" block @click="handleLogin" :loading="loading">
+      <Button type="primary" size="large" block @click="showCaptchaBox" :loading="loading">
         {{ t('sys.login.loginButton') }}
       </Button>
       <!-- <Button size="large" class="mt-4 enter-x" block @click="handleRegister">
@@ -82,7 +82,7 @@
   </Form>
 </template>
 <script lang="ts" setup>
-  import { reactive, ref, unref, computed } from 'vue';
+  import { reactive, ref, unref, computed,defineExpose,defineEmits } from 'vue';
 
   import { Checkbox, Form, Input, Row, Col, Button, Divider } from 'ant-design-vue';
   import {
@@ -101,7 +101,7 @@
   import { LoginStateEnum, useLoginState, useFormRules, useFormValid } from './useLogin';
   import { useDesign } from '/@/hooks/web/useDesign';
   //import { onKeyStroke } from '@vueuse/core';
-
+  const emit = defineEmits(['verifyShow'])
   const ACol = Col;
   const ARow = Row;
   const FormItem = Form.Item;
@@ -128,6 +128,19 @@
   //onKeyStroke('Enter', handleLogin);
 
   const getShow = computed(() => unref(getLoginState) === LoginStateEnum.LOGIN);
+
+  async function showCaptchaBox(){
+    const data = await validForm();
+    if (!data) return;
+    emit("verifyShow");
+  }
+
+  async function verifySuccess(verifyCode:string){
+    console.log(verifyCode)
+    return new Promise(resolve => {
+      handleLogin()
+    });
+  }
 
   async function handleLogin() {
     const data = await validForm();
@@ -156,4 +169,8 @@
       loading.value = false;
     }
   }
+
+  defineExpose({
+    verifySuccess
+  })
 </script>
